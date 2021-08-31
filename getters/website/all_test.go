@@ -1,9 +1,6 @@
-package main
+package website
 
-import (
-	"context"
-	"testing"
-)
+import "testing"
 
 func TestJsonExtractor(t *testing.T) {
 	d := `{"a":{"rs":1,"code":0,"address":"中国  北京 北京市 教育网","ip":"103.201.26.28","isDomain":0}}`
@@ -33,11 +30,4 @@ func TestSearchExtractor(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(ip)
-}
-
-func TestShellHandler(t *testing.T) {
-	h := NewShellHandler(&ShellHandlerConfig{
-		Command: StringOrStringArray{B: true, S: `cat $IP`},
-	})
-	h.Handle(context.Background(), `1.1.2.2`)
 }

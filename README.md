@@ -1,3 +1,3 @@
 # on-ip-changed
 
-On-IP-Changed is a tiny utility that periodically checks the external (public) IP of the system running this program and invokes external commands to notify the change.
+On-IP-Changed is a small utility that periodically checks the IP of the system running this program and invokes handlers to notify what the change is.

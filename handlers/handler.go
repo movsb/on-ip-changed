@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"os/exec"
+
+	"github.com/movsb/on-ip-changed/config"
 )
 
 type Handler interface {
@@ -13,10 +15,10 @@ type Handler interface {
 }
 
 type ShellHandler struct {
-	cfg *ShellHandlerConfig
+	cfg *config.ShellHandlerConfig
 }
 
-func NewShellHandler(cfg *ShellHandlerConfig) Handler {
+func NewShellHandler(cfg *config.ShellHandlerConfig) Handler {
 	return &ShellHandler{cfg: cfg}
 }
 

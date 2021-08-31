@@ -1,17 +1,18 @@
-package main
+package getters
 
 import (
 	"context"
 	"fmt"
-	"io"
 	"log"
 	"math/rand"
-	"net/http"
-	"time"
 )
 
-func request(ctx context.Context, sources []*SourceConfig, concurrency int) (string, error) {
-	nSources := len(sources)
+type IPGetter interface {
+	GetIP(ctx context.Context) (string, error)
+}
+
+func Request(ctx context.Context, getters []IPGetter, concurrency int) (string, error) {
+	nSources := len(getters)
 	if nSources <= 0 {
 		return ``, fmt.Errorf(`no sources to request`)
 	}
@@ -37,9 +38,9 @@ func request(ctx context.Context, sources []*SourceConfig, concurrency int) (str
 		if n == -1 {
 			break
 		}
-		s := sources[n]
-		go func(i int, s *SourceConfig) {
-			ip, err := roundtrip(ctx, i, s)
+		s := getters[n]
+		go func(i int, getter IPGetter) {
+			ip, err := getter.GetIP(ctx)
 			if err != nil {
 				log.Println(err)
 			}
@@ -75,7 +76,7 @@ func request(ctx context.Context, sources []*SourceConfig, concurrency int) (str
 	case concurrency == 2 && max != 2:
 		return ``, fmt.Errorf(`concurrency == 2 && not all succeeded`)
 	default:
-		if max < concurrency/2 {
+		if max <= concurrency/2 {
 			return ``, fmt.Errorf(`cannot find majority (%d/%d)`, max, concurrency)
 		}
 	}
@@ -106,51 +107,4 @@ func unique(n int, N int) func() int {
 		}
 		return i
 	}
-}
-
-func roundtrip(ctx context.Context, i int, s *SourceConfig) (string, error) {
-	st := time.Now()
-	log.Printf(`roundtrip: [%d] sending request to %s`, i, s.URL)
-	defer func() {
-		et := time.Now()
-		log.Printf(`roundtrip: [%d] time elapsed: %v`, i, et.Sub(st))
-	}()
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, s.URL, nil)
-	if err != nil {
-		return ``, fmt.Errorf(`roundtrip: bad request: %w`, err)
-	}
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return ``, fmt.Errorf(`roundtrip: http err: %w`, err)
-	}
-	defer res.Body.Close()
-	if res.StatusCode != 200 {
-		b, _ := io.ReadAll(io.LimitReader(res.Body, 1<<10))
-		return ``, fmt.Errorf(`roundtrip: bad status: %s: %s: %s`, res.Status, s.URL, string(b))
-	}
-	body, err := io.ReadAll(io.LimitReader(res.Body, 1<<20))
-	if err != nil {
-		return ``, fmt.Errorf(`roundtrip: error reading body: %w`, err)
-	}
-	str := string(body)
-
-	var e Extractor
-	switch s.Type {
-	case `json`:
-		e = NewJsonExtractor(str, s.Path)
-	case `raw`:
-		e = NewRawExtractor(str)
-	case `search`:
-		e = NewSearchExtractor(str)
-	default:
-		return ``, fmt.Errorf(`roundtrip: unknown type: %s`, s.Type)
-	}
-
-	ip, err := e.Extract()
-	if err != nil {
-		return ``, fmt.Errorf(`roundtrip: error extracting: %w`, err)
-	}
-
-	return ip, nil
 }
