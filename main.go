@@ -13,6 +13,7 @@ import (
 	"github.com/movsb/on-ip-changed/config"
 	"github.com/movsb/on-ip-changed/getters"
 	"github.com/movsb/on-ip-changed/getters/asus"
+	"github.com/movsb/on-ip-changed/getters/ifconfig"
 	"github.com/movsb/on-ip-changed/getters/website"
 	"github.com/movsb/on-ip-changed/handlers"
 	"github.com/spf13/cobra"
@@ -52,6 +53,7 @@ func daemon(cmd *cobra.Command, args []string) {
 		log.Printf(`Doing task %s...`, t.Name)
 		var gets []getters.IPGetter
 		for _, s := range t.Getters {
+			var get getters.IPGetter
 			switch {
 			case s.Asus != nil:
 				a := &asus.Asus{
@@ -59,17 +61,20 @@ func daemon(cmd *cobra.Command, args []string) {
 					Username: s.Asus.Username,
 					Password: s.Asus.Password,
 				}
-				gets = append(gets, a)
+				get = a
 			case s.Website != nil:
 				w := &website.Website{
 					URL:    s.Website.URL,
 					Format: s.Website.Format,
 					Path:   s.Website.Path,
 				}
-				gets = append(gets, w)
+				get = w
+			case s.IfConfig != nil:
+				get = ifconfig.NewIfConfig(s.IfConfig)
 			default:
 				panic(`invalid getter`)
 			}
+			gets = append(gets, get)
 		}
 		ip, err := getters.Request(ctx, gets, cfg.Daemon.Concurrency)
 		if err != nil {

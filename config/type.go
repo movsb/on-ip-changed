@@ -3,6 +3,8 @@ package config
 import (
 	"fmt"
 	"time"
+
+	"github.com/movsb/on-ip-changed/getters/ifconfig"
 )
 
 // Config ...
@@ -48,8 +50,9 @@ type TaskConfig struct {
 ////////////////////////////////////////////////////////////////
 
 type GetterUnmarshaler struct {
-	Website *WebsiteGetterConfig
-	Asus    *AsusGetterConfig
+	Website  *WebsiteGetterConfig
+	Asus     *AsusGetterConfig
+	IfConfig *ifconfig.Config
 }
 
 func (s *GetterUnmarshaler) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -73,6 +76,13 @@ func (s *GetterUnmarshaler) UnmarshalYAML(unmarshal func(interface{}) error) err
 			return err
 		}
 		s.Asus = &a
+		return nil
+	case `ifconfig`:
+		var i ifconfig.Config
+		if err := unmarshal(&i); err != nil {
+			return err
+		}
+		s.IfConfig = &i
 		return nil
 	default:
 		return fmt.Errorf(`unknown type: %q`, t.Type)

@@ -36,10 +36,12 @@ tasks:
       #- type: website
       #  url: https://api.ipify.org/
       #  format: raw
-      - type: asus
-        address: 192.168.1.1
-        username: asus
-        password: asus
+      #- type: asus
+      #  address: 192.168.1.1
+      #  username: asus
+      #  password: asus
+      - type: ifconfig
+        name: nuc
     handlers:
       - name: echo
         shell: 
