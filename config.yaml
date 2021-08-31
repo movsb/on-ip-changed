@@ -1,0 +1,36 @@
+daemon:
+  # check interval, in duration.
+  interval: 10m
+  # how many concurrent requests should be sent in a single time.
+  concurrency: 7
+  # request timeout
+  timeout: 15s
+
+sources:
+  - name: ipcn
+    url: https://ip.cn/api/index?ip=&type=0
+    type: json
+    path: ip
+  - name: ifconfig.co
+    url: https://ifconfig.co/ip
+    type: raw
+  - name: ipip.net
+    url: https://myip.ipip.net/
+    type: search
+  - name: myip.com.tw
+    url: https://myip.com.tw/
+    type: search
+  - name: wtfismyip.com
+    url: https://wtfismyip.com/text
+    type: raw
+  - name: ip-api
+    url: http://ip-api.com/line/?fields=query
+    type: raw
+  - name: sen
+    url: https://ip.sendev.cc
+    type: raw
+
+handlers:
+  - name: echo
+    shell: 
+      command: echo $IP
