@@ -40,8 +40,18 @@ tasks:
       #  address: 192.168.1.1
       #  username: asus
       #  password: asus
+      #- type: ifconfig
+      #  name: nuc
+      - type: domain
+        domain: home.twofei.com
+    handlers:
+      - name: echo
+        shell: 
+          command: echo $IP
+  - name: local
+    getters:
       - type: ifconfig
-        name: nuc
+        name: eno1
     handlers:
       - name: echo
         shell: 

@@ -13,6 +13,7 @@ import (
 	"github.com/movsb/on-ip-changed/config"
 	"github.com/movsb/on-ip-changed/getters"
 	"github.com/movsb/on-ip-changed/getters/asus"
+	"github.com/movsb/on-ip-changed/getters/domain"
 	"github.com/movsb/on-ip-changed/getters/ifconfig"
 	"github.com/movsb/on-ip-changed/getters/website"
 	"github.com/movsb/on-ip-changed/handlers"
@@ -71,6 +72,8 @@ func daemon(cmd *cobra.Command, args []string) {
 				get = w
 			case s.IfConfig != nil:
 				get = ifconfig.NewIfConfig(s.IfConfig)
+			case s.Domain != nil:
+				get = domain.NewDomain(s.Domain)
 			default:
 				panic(`invalid getter`)
 			}

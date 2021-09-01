@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/movsb/on-ip-changed/getters/domain"
 	"github.com/movsb/on-ip-changed/getters/ifconfig"
 )
 
@@ -53,6 +54,7 @@ type GetterUnmarshaler struct {
 	Website  *WebsiteGetterConfig
 	Asus     *AsusGetterConfig
 	IfConfig *ifconfig.Config
+	Domain   *domain.Config
 }
 
 func (s *GetterUnmarshaler) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -83,6 +85,13 @@ func (s *GetterUnmarshaler) UnmarshalYAML(unmarshal func(interface{}) error) err
 			return err
 		}
 		s.IfConfig = &i
+		return nil
+	case `domain`:
+		var d domain.Config
+		if err := unmarshal(&d); err != nil {
+			return err
+		}
+		s.Domain = &d
 		return nil
 	default:
 		return fmt.Errorf(`unknown type: %q`, t.Type)
