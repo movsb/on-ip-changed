@@ -4,8 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
+
+	"github.com/movsb/on-ip-changed/utils/registry"
 )
+
+func init() {
+	registry.RegisterHandler(`shell`, Config{}, NewHandler)
+}
 
 type StringOrStringArray struct {
 	B  bool // true if S.
@@ -57,6 +64,8 @@ func (h *Handler) Handle(ctx context.Context, ip string) error {
 	}
 
 	cmd := exec.CommandContext(ctx, name, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	cmd.Dir = h.cfg.WorkDir
 	for k, v := range h.cfg.Env {
 		e := fmt.Sprintf("%s=%s", k, v)

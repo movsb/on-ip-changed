@@ -1,58 +1,23 @@
 daemon:
-  # task execution interval, in duration.
   interval: 1m
-  # how many concurrent getters should be done in a single time.
   concurrency: 1
-  # getter timeout
   timeout: 15s
-  # notify first change
   initial: true
 
 tasks:
   - name: wan
     getters:
-      #- type: website
-      #  url: https://ip.cn/api/index?ip=&type=0
-      #  format: json
-      #  path: ip
-      #- type: website
-      #  url: https://ifconfig.co/ip
-      #  format: raw
-      #- type: website
-      #  url: https://myip.ipip.net/
-      #  format: search
-      #- type: website
-      #  url: https://myip.com.tw/
-      #  format: search
-      #- type: website
-      #  url: https://wtfismyip.com/text
-      #  format: raw
-      #- type: website
-      #  url: http://ip-api.com/line/?fields=query
-      #  format: raw
-      #- type: website
-      #  url: https://ip.sendev.cc
-      #  format: raw
-      #- type: website
-      #  url: https://api.ipify.org/
-      #  format: raw
-      #- type: asus
-      #  address: 192.168.1.1
-      #  username: asus
-      #  password: asus
-      #- type: ifconfig
-      #  name: nuc
-      - type: domain
-        domain: home.twofei.com
+      - type: asus
+        address: 192.168.1.1
+        username: asus
+        password: asus
     handlers:
-      - name: echo
-        shell: 
-          command: echo $IP
+      - shell: 
+          command: echo --- $IP ---
   - name: local
     getters:
       - type: ifconfig
         name: eno1
     handlers:
-      - name: echo
-        shell: 
-          command: echo $IP
+      - shell: 
+          command: echo --- $IP ---

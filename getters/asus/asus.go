@@ -12,12 +12,12 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/movsb/on-ip-changed/getters/registry"
 	"github.com/movsb/on-ip-changed/utils"
+	"github.com/movsb/on-ip-changed/utils/registry"
 )
 
 func init() {
-	registry.Register(`asus`, Config{}, NewAsus)
+	registry.RegisterGetter(`asus`, Config{}, NewAsus)
 }
 
 type Config struct {
@@ -35,7 +35,7 @@ func NewAsus(c *Config) *Asus {
 	return &Asus{c: c}
 }
 
-func (a *Asus) GetIP(ctx context.Context) (string, error) {
+func (a *Asus) Get(ctx context.Context) (string, error) {
 	if err := a.login(ctx); err != nil {
 		return ``, err
 	}

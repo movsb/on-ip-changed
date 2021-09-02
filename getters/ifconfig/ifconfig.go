@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/movsb/on-ip-changed/getters/registry"
+	"github.com/movsb/on-ip-changed/utils/registry"
 )
 
 func init() {
-	registry.Register(`ifconfig`, Config{}, NewIfConfig)
+	registry.RegisterGetter(`ifconfig`, Config{}, NewIfConfig)
 }
 
 type Config struct {
@@ -25,7 +25,7 @@ func NewIfConfig(c *Config) *IfConfig {
 	return &IfConfig{c: c}
 }
 
-func (i *IfConfig) GetIP(ctx context.Context) (string, error) {
+func (i *IfConfig) Get(ctx context.Context) (string, error) {
 	face, err := net.InterfaceByName(i.c.Name)
 	if err != nil {
 		return "", fmt.Errorf("ifconfig: InterfaceByName: %w", err)

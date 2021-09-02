@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/movsb/on-ip-changed/getters/registry"
+	"github.com/movsb/on-ip-changed/utils/registry"
 )
 
 func init() {
-	registry.Register(`domain`, Config{}, NewDomain)
+	registry.RegisterGetter(`domain`, Config{}, NewDomain)
 }
 
 type Config struct {
@@ -24,7 +24,7 @@ func NewDomain(c *Config) *Domain {
 	return &Domain{c: c}
 }
 
-func (d *Domain) GetIP(ctx context.Context) (string, error) {
+func (d *Domain) Get(ctx context.Context) (string, error) {
 	r := &net.Resolver{}
 	ips, err := r.LookupIPAddr(ctx, d.c.Domain)
 	if err != nil {

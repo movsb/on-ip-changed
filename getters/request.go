@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-
-	"github.com/movsb/on-ip-changed/getters/registry"
 )
 
-func Request(ctx context.Context, getters []registry.IPGetter, concurrency int) (string, error) {
+func Request(ctx context.Context, getters []Getter, concurrency int) (string, error) {
 	nSources := len(getters)
 	if nSources <= 0 {
 		return ``, fmt.Errorf(`no sources to request`)
@@ -37,8 +35,8 @@ func Request(ctx context.Context, getters []registry.IPGetter, concurrency int) 
 			break
 		}
 		s := getters[n]
-		go func(i int, getter registry.IPGetter) {
-			ip, err := getter.GetIP(ctx)
+		go func(i int, getter Getter) {
+			ip, err := getter.Get(ctx)
 			if err != nil {
 				log.Println(err)
 			}

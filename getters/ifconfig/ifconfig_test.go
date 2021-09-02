@@ -10,5 +10,5 @@ func TestIfConfig(t *testing.T) {
 	i := NewIfConfig(&Config{
 		Name: `tun0`,
 	})
-	t.Log(i.GetIP(context.TODO()))
+	t.Log(i.Get(context.TODO()))
 }

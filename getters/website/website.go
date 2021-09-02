@@ -8,11 +8,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/movsb/on-ip-changed/getters/registry"
+	"github.com/movsb/on-ip-changed/utils/registry"
 )
 
 func init() {
-	registry.Register(`website`, Config{}, NewWebsite)
+	registry.RegisterGetter(`website`, Config{}, NewWebsite)
 }
 
 type Config struct {
@@ -29,7 +29,7 @@ func NewWebsite(c *Config) *Website {
 	return &Website{c: c}
 }
 
-func (w *Website) GetIP(ctx context.Context) (string, error) {
+func (w *Website) Get(ctx context.Context) (string, error) {
 	return w.roundtrip(ctx, -1, w.c.URL, w.c.Format, w.c.Path)
 }
 

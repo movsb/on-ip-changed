@@ -1,18 +1,25 @@
 package getters
 
 import (
+	"context"
+	"fmt"
+
 	_ "github.com/movsb/on-ip-changed/getters/asus"
 	_ "github.com/movsb/on-ip-changed/getters/domain"
 	_ "github.com/movsb/on-ip-changed/getters/ifconfig"
-	"github.com/movsb/on-ip-changed/getters/registry"
 	_ "github.com/movsb/on-ip-changed/getters/website"
+	"github.com/movsb/on-ip-changed/utils/registry"
 )
 
-type Unmarshaler struct {
-	g registry.IPGetter
+type Getter interface {
+	Get(ctx context.Context) (string, error)
 }
 
-func (u *Unmarshaler) Getter() registry.IPGetter {
+type Unmarshaler struct {
+	g Getter
+}
+
+func (u *Unmarshaler) Getter() Getter {
 	return u.g
 }
 
@@ -23,10 +30,14 @@ func (u *Unmarshaler) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := unmarshal(&t); err != nil {
 		return err
 	}
-	g, err := registry.Create(t.Type, unmarshal)
+	g, err := registry.CreateGetter(t.Type, unmarshal)
 	if err != nil {
 		return err
 	}
-	u.g = g
+	gg, ok := g.(Getter)
+	if !ok {
+		return fmt.Errorf("getter: not a getter")
+	}
+	u.g = gg
 	return nil
 }

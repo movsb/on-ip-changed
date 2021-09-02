@@ -1,6 +1,14 @@
 package dnspod
 
-import "context"
+import (
+	"context"
+
+	"github.com/movsb/on-ip-changed/utils/registry"
+)
+
+func init() {
+	registry.RegisterHandler(`dnspod`, RenewerConfig{}, NewHandler)
+}
 
 type RenewerConfig struct {
 	Config

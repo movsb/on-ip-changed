@@ -12,10 +12,6 @@ import (
 
 	"github.com/movsb/on-ip-changed/config"
 	"github.com/movsb/on-ip-changed/getters"
-	"github.com/movsb/on-ip-changed/getters/registry"
-	"github.com/movsb/on-ip-changed/handlers"
-	"github.com/movsb/on-ip-changed/handlers/dnspod"
-	"github.com/movsb/on-ip-changed/handlers/shell"
 	"github.com/spf13/cobra"
 )
 
@@ -50,7 +46,7 @@ func daemon(cmd *cobra.Command, args []string) {
 		last := ``
 
 		log.Printf(`Doing task %s...`, t.Name)
-		var gets []registry.IPGetter
+		var gets []getters.Getter
 		for _, s := range t.Getters {
 			gets = append(gets, s.Getter())
 		}
@@ -69,17 +65,8 @@ func daemon(cmd *cobra.Command, args []string) {
 		last = ip
 
 		for _, hc := range t.Handlers {
-			var h handlers.Handler
-			switch {
-			case hc.Shell != nil:
-				h = shell.NewHandler(hc.Shell)
-			case hc.DnsPod != nil:
-				h = dnspod.NewHandler(hc.DnsPod)
-			default:
-				log.Println(`unknown handler`)
-				continue
-			}
-			h.Handle(context.Background(), last)
+			h := hc.Handler()
+			h.Handle(ctx, last)
 		}
 	}
 

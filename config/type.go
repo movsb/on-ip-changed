@@ -42,9 +42,9 @@ func DefaultDaemonConfig() DaemonConfig {
 ////////////////////////////////////////////////////////////////
 
 type TaskConfig struct {
-	Name     string                 `yaml:"name"`
-	Getters  []*getters.Unmarshaler `yaml:"getters"`
-	Handlers []*handlers.Config     `yaml:"handlers"`
+	Name     string                  `yaml:"name"`
+	Getters  []*getters.Unmarshaler  `yaml:"getters"`
+	Handlers []*handlers.Unmarshaler `yaml:"handlers"`
 }
 
 ////////////////////////////////////////////////////////////////
