@@ -7,11 +7,11 @@ import (
 
 func TestLogin(t *testing.T) {
 	t.SkipNow()
-	a := Asus{
+	a := NewAsus(&Config{
 		Address:  `192.168.1.1`,
 		Username: `asus`,
 		Password: `asus`,
-	}
+	})
 	if err := a.login(context.TODO()); err != nil {
 		t.Fatal(err)
 	}

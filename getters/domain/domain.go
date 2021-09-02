@@ -4,7 +4,13 @@ import (
 	"context"
 	"fmt"
 	"net"
+
+	"github.com/movsb/on-ip-changed/getters/registry"
 )
+
+func init() {
+	registry.Register(`domain`, Config{}, NewDomain)
+}
 
 type Config struct {
 	Domain string `yaml:"domain"`

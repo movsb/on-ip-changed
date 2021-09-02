@@ -12,14 +12,27 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/movsb/on-ip-changed/getters/registry"
 	"github.com/movsb/on-ip-changed/utils"
 )
 
-type Asus struct {
+func init() {
+	registry.Register(`asus`, Config{}, NewAsus)
+}
+
+type Config struct {
 	Address  string `yaml:"address"`
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
-	token    string
+}
+
+type Asus struct {
+	c     *Config
+	token string
+}
+
+func NewAsus(c *Config) *Asus {
+	return &Asus{c: c}
 }
 
 func (a *Asus) GetIP(ctx context.Context) (string, error) {
@@ -34,13 +47,13 @@ func (a *Asus) GetIP(ctx context.Context) (string, error) {
 }
 
 func (a *Asus) login(ctx context.Context) error {
-	u, err := url.Parse(utils.AddHTTPPrefix(a.Address))
+	u, err := url.Parse(utils.AddHTTPPrefix(a.c.Address))
 	if err != nil {
-		return fmt.Errorf(`asus: bad address: %s: %w`, a.Address, err)
+		return fmt.Errorf(`asus: bad address: %s: %w`, a.c.Address, err)
 	}
 	u.Path = filepath.Join(`/`, u.Path, `login.cgi`)
 	body := `group_id=&action_mode=&action_script=&action_wait=5&current_page=Main_Login.asp&next_page=index.asp&login_authorization=%s`
-	auth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf(`%s:%s`, a.Username, a.Password)))
+	auth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf(`%s:%s`, a.c.Username, a.c.Password)))
 	body = fmt.Sprintf(body, auth)
 	log.Printf(`asus: url: %s`, u.String())
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.String(), strings.NewReader(body))
@@ -78,9 +91,9 @@ type Status struct {
 }
 
 func (a *Asus) status(ctx context.Context) (*Status, error) {
-	u, err := url.Parse(utils.AddHTTPPrefix(a.Address))
+	u, err := url.Parse(utils.AddHTTPPrefix(a.c.Address))
 	if err != nil {
-		return nil, fmt.Errorf(`asus: bad address: %s: %w`, a.Address, err)
+		return nil, fmt.Errorf(`asus: bad address: %s: %w`, a.c.Address, err)
 	}
 	u.Path = filepath.Join(`/`, u.Path, `status.asp`)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)

@@ -12,13 +12,11 @@ import (
 
 	"github.com/movsb/on-ip-changed/config"
 	"github.com/movsb/on-ip-changed/getters"
-	"github.com/movsb/on-ip-changed/getters/asus"
-	"github.com/movsb/on-ip-changed/getters/domain"
-	"github.com/movsb/on-ip-changed/getters/ifconfig"
-	"github.com/movsb/on-ip-changed/getters/website"
+	"github.com/movsb/on-ip-changed/getters/registry"
 	"github.com/movsb/on-ip-changed/handlers"
+	"github.com/movsb/on-ip-changed/handlers/dnspod"
+	"github.com/movsb/on-ip-changed/handlers/shell"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
 )
 
 func init() {
@@ -46,38 +44,15 @@ func main() {
 }
 
 func daemon(cmd *cobra.Command, args []string) {
-	cfg := readConfig(cmd)
+	cfg := config.ReadConfig(cmd)
 
 	task := func(ctx context.Context, t *config.TaskConfig) {
 		last := ``
 
 		log.Printf(`Doing task %s...`, t.Name)
-		var gets []getters.IPGetter
+		var gets []registry.IPGetter
 		for _, s := range t.Getters {
-			var get getters.IPGetter
-			switch {
-			case s.Asus != nil:
-				a := &asus.Asus{
-					Address:  s.Asus.Address,
-					Username: s.Asus.Username,
-					Password: s.Asus.Password,
-				}
-				get = a
-			case s.Website != nil:
-				w := &website.Website{
-					URL:    s.Website.URL,
-					Format: s.Website.Format,
-					Path:   s.Website.Path,
-				}
-				get = w
-			case s.IfConfig != nil:
-				get = ifconfig.NewIfConfig(s.IfConfig)
-			case s.Domain != nil:
-				get = domain.NewDomain(s.Domain)
-			default:
-				panic(`invalid getter`)
-			}
-			gets = append(gets, get)
+			gets = append(gets, s.Getter())
 		}
 		ip, err := getters.Request(ctx, gets, cfg.Daemon.Concurrency)
 		if err != nil {
@@ -93,16 +68,18 @@ func daemon(cmd *cobra.Command, args []string) {
 
 		last = ip
 
-		for _, h := range t.Handlers {
+		for _, hc := range t.Handlers {
+			var h handlers.Handler
 			switch {
-			case h.Shell != nil:
-				h := handlers.NewShellHandler(&config.ShellHandlerConfig{
-					Command: config.StringOrStringArray{B: true, S: `cat $IP`},
-				})
-				h.Handle(context.Background(), last)
+			case hc.Shell != nil:
+				h = shell.NewHandler(hc.Shell)
+			case hc.DnsPod != nil:
+				h = dnspod.NewHandler(hc.DnsPod)
 			default:
-				panic(`unknown handler`)
+				log.Println(`unknown handler`)
+				continue
 			}
+			h.Handle(context.Background(), last)
 		}
 	}
 
@@ -128,24 +105,4 @@ func daemon(cmd *cobra.Command, args []string) {
 	for range tick.C {
 		loop()
 	}
-}
-
-// TODO: validate
-func readConfig(cmd *cobra.Command) *config.Config {
-	configFileString, err := cmd.Flags().GetString(`config`)
-	if err != nil {
-		panic(err)
-	}
-	fp, err := os.Open(configFileString)
-	if err != nil {
-		panic(err)
-	}
-	defer fp.Close()
-	cfg := config.Config{}
-	dec := yaml.NewDecoder(fp)
-	// dec.SetStrict(true)
-	if err := dec.Decode(&cfg); err != nil {
-		panic(err)
-	}
-	return &cfg
 }

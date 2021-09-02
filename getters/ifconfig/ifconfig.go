@@ -4,7 +4,13 @@ import (
 	"context"
 	"fmt"
 	"net"
+
+	"github.com/movsb/on-ip-changed/getters/registry"
 )
+
+func init() {
+	registry.Register(`ifconfig`, Config{}, NewIfConfig)
+}
 
 type Config struct {
 	Name  string `yaml:"name"`
