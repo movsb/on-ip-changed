@@ -64,7 +64,7 @@ func (w *Website) roundtrip(ctx context.Context, i int, url, format, path string
 	switch format {
 	case `json`:
 		e = NewJsonExtractor(str, path)
-	case `raw`:
+	case `text`:
 		e = NewRawExtractor(str)
 	case `search`:
 		e = NewSearchExtractor(str)

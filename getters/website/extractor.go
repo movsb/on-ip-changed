@@ -55,7 +55,7 @@ func (e *RawExtractor) Extract() (string, error) {
 	s := strings.TrimSpace(e.s)
 	ip := net.ParseIP(s).To4()
 	if ip == nil {
-		return ``, fmt.Errorf(`raw_extractor: not an ip: %s`, s)
+		return ``, fmt.Errorf(`text_extractor: not an ip: %s`, s)
 	}
 	return ip.String(), nil
 }

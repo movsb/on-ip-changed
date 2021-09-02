@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/movsb/on-ip-changed/utils/registry"
 )
 
@@ -61,12 +62,25 @@ func (h *Handler) Handle(ctx context.Context, ip string) error {
 	} else {
 		name = h.cfg.Command.SS[0]
 		args = h.cfg.Command.SS[1:]
+		for i, arg := range args {
+			if arg == `$IP` {
+				args[i] = ip
+			}
+		}
 	}
 
 	cmd := exec.CommandContext(ctx, name, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Dir = h.cfg.WorkDir
+
+	if h.cfg.WorkDir != `` {
+		workDir, err := h.expandHome(h.cfg.WorkDir)
+		if err != nil {
+			return err
+		}
+		cmd.Dir = workDir
+	}
+
 	for k, v := range h.cfg.Env {
 		e := fmt.Sprintf("%s=%s", k, v)
 		cmd.Env = append(cmd.Env, e)
@@ -80,4 +94,8 @@ func (h *Handler) Handle(ctx context.Context, ip string) error {
 	}
 
 	return nil
+}
+
+func (h *Handler) expandHome(path string) (string, error) {
+	return homedir.Expand(path)
 }

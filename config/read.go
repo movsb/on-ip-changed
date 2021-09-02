@@ -3,17 +3,12 @@ package config
 import (
 	"os"
 
-	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
 
 // TODO: validate
-func ReadConfig(cmd *cobra.Command) *Config {
-	configFileString, err := cmd.Flags().GetString(`config`)
-	if err != nil {
-		panic(err)
-	}
-	fp, err := os.Open(configFileString)
+func ReadConfig(path string) *Config {
+	fp, err := os.Open(path)
 	if err != nil {
 		panic(err)
 	}

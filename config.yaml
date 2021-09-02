@@ -5,19 +5,10 @@ daemon:
   initial: true
 
 tasks:
-  - name: wan
+  - name: wg
     getters:
-      - type: asus
-        address: 192.168.1.1
-        username: asus
-        password: asus
-    handlers:
-      - shell: 
-          command: echo --- $IP ---
-  - name: local
-    getters:
-      - type: ifconfig
-        name: eno1
+      - type: domain
+        domain: home.twofei.com
     handlers:
       - shell: 
           command: echo --- $IP ---
