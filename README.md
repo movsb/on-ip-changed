@@ -195,6 +195,39 @@ Additional arguments can be set:
 
   Home directory in style of `~` (no `~user`) in the `work_dir` will be expanded to their respective directories.
 
+### HTTP
+
+**HTTP** handler makes a request.
+
+Example configuration:
+
+```yaml
+http:
+  endpoint: http://example.com
+  args:
+    ip: $IP
+  headers:
+    token: ttt
+  method: GET
+  body: Your IP changed to $IP.
+```
+
+The result URL will be: <http://example.com/?ip=1.2.3.4> 。
+
+### DnsPod
+
+**DnsPod** handler updates your DNS record of DnsPod.
+
+Example configuration:
+
+```yaml
+dnspod:
+  token: 123,abcdefgh
+  email: your@example.com
+  domain: example.com
+  record: subdomain
+```
+
 ## Config File
 
 Full configuration example:

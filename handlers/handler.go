@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	_ "github.com/movsb/on-ip-changed/handlers/dnspod"
+	_ "github.com/movsb/on-ip-changed/handlers/http"
 	_ "github.com/movsb/on-ip-changed/handlers/shell"
 	"github.com/movsb/on-ip-changed/utils/registry"
 )
