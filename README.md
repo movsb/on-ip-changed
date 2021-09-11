@@ -2,6 +2,36 @@
 
 On-IP-Changed is a small utility that periodically checks the IP of the system running this program and invokes handlers to notify what the change is.
 
+## Config File
+
+Full configuration example:
+
+```yaml
+daemon:
+  # tasks execution interval
+  interval: 1m
+  # if multiple getters, at most `concurrency`
+  # randomly selected getters will be used.
+  concurrency: 1
+  # timeout out for getter and handler execution.
+  timeout: 15s
+  # notify the first IP address?
+  # The first is what we get when we restart the daemon. if restarted 
+  # frequently, handlers will be executed frequently too, with the same IP.
+  initial: false
+
+tasks:
+  - name: test
+    # if multiple getters, handlers will be executed if and only if when
+    # a majority ( > a half ) of the getters return the same IP address.
+    getters:
+      - type: domain
+        domain: example.com
+    handlers:
+      - shell: 
+          command: echo --- $IP ---
+```
+
 ## Concepts
 
 * **Tasks** Each contains *getters* and *handlers*.
@@ -55,7 +85,7 @@ Can be one of:
 
 * **json**
 
-  The content is an JSON object containing a field specifying the IP.
+  The content is a JSON object containing a field specifying the IP.
 
   Use `path` to specify the path reaching to that field.
 
@@ -134,6 +164,9 @@ address: 192.168.1.1
 username: asus
 password: asus
 ```
+
+Getting the outbound IPv4 address from routers can be useful when you use VPN.
+Because `website` will report the IP address of your VPN server, which you mostly cannot control its port forwarding rules.
 
 ## Handlers
 
@@ -214,6 +247,8 @@ http:
 
 The result URL will be: <http://example.com/?ip=1.2.3.4> 。
 
+For example, you can use [Chanify](https://github.com/chanify/chanify) to notify your latest IP address.
+
 ### DnsPod
 
 **DnsPod** handler updates your DNS record of DnsPod.
@@ -228,32 +263,4 @@ dnspod:
   record: subdomain
 ```
 
-## Config File
-
-Full configuration example:
-
-```yaml
-daemon:
-  # tasks execution interval
-  interval: 1m
-  # if multiple getters, at most `concurrency`
-  # randomly selected getters will be used.
-  concurrency: 1
-  # timeout out for getter and handler execution.
-  timeout: 15s
-  # notify the first IP address?
-  # The first is what we get when we restart the daemon. if restarted 
-  # frequently, handlers will be executed frequently too, with the same IP.
-  initial: false
-
-tasks:
-  - name: test
-    # if multiple getters, handlers will be executed if and only if when
-    # a majority ( > a half ) of the getters return the same IP address.
-    getters:
-      - type: domain
-        domain: example.com
-    handlers:
-      - shell: 
-          command: echo --- $IP ---
-```
+There should have be more DNS provider handlers...

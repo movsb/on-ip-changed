@@ -12,3 +12,9 @@ tasks:
     handlers:
       - shell: 
           command: echo --- $IP ---
+      - http:
+          endpoint: https://api.chanify.net/v1/sender/CNiJhtUGEiJBRE5RRDY1VUFQRklXM1dNWUZTR0JBV0NWVElETlZHTDVJGhQBEFReB7e0AGspZ7PQtgBnmb_iTiIECAEQAQ.wGlSSBG4SW9LUfe9fiTbNmKozCUnIFxKmGe-pEtkhHk
+          method: POST
+          headers:
+            content-type: text/plain
+          body: $IP
