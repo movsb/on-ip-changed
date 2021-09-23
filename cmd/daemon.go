@@ -121,13 +121,17 @@ func (t *TaskExecutor) Execute(ctx context.Context) {
 		t.log.Printf(`got initial ip: %s`, ip)
 		return
 	}
+	if ip == t.last {
+		t.log.Printf(`ip not changed, skip executing handlers`)
+		return
+	}
 
 	t.last = ip
 
 	for i, hc := range t.task.Handlers {
 		h := hc.Handler()
 		if err := h.Handle(ctx, t.last); err != nil {
-			t.log.Printf(`error executing handler: %d`, i)
+			t.log.Printf(`error executing handler[%d]: %v`, i, err)
 			continue
 		}
 	}

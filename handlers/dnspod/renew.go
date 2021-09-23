@@ -11,7 +11,7 @@ func init() {
 }
 
 type RenewerConfig struct {
-	Config
+	Config `yaml:",inline"`
 	Domain string `yaml:"domain"`
 	Record string `yaml:"record"`
 }

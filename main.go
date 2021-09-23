@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/movsb/on-ip-changed/cmd"
+	"github.com/movsb/on-ip-changed/utils/version"
 	"github.com/spf13/cobra"
 )
 
@@ -21,6 +22,7 @@ func main() {
 	}
 
 	cmd.AddCommands(rootCmd)
+	version.AddCommands(rootCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
