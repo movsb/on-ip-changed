@@ -44,7 +44,7 @@ RestartSec=30
 WantedBy=multi-user.target
 EOF
 	systemctl enable "$serviceFullName"
-	systemctl start "$serviceFullName"
+	systemctl restart "$serviceFullName"
 }
 
-$@
+"$@"

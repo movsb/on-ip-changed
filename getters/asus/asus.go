@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -120,10 +121,12 @@ func (a *Asus) status(ctx context.Context) (*Status, error) {
 	if matches == nil || len(matches[1]) <= 0 {
 		return nil, fmt.Errorf(`asus: no wan ip was found`)
 	}
-
+	ip := net.ParseIP(matches[1])
+	if ip == nil || ip.To4() == nil || ip.IsUnspecified() {
+		return nil, fmt.Errorf(`asus: no wan ip was found`)
+	}
 	s := &Status{
 		WanLinkIpAddr: matches[1],
 	}
-
 	return s, nil
 }
