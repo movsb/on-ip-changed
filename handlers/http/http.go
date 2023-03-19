@@ -33,7 +33,7 @@ func NewHandler(cfg *Config) *Handler {
 	return &Handler{cfg: cfg}
 }
 
-func (h *Handler) Handle(ctx context.Context, ip utils.IP) error {
+func (h *Handler) Handle(ctx context.Context, _, ip utils.IP) error {
 	method := h.cfg.Method
 	if method == "" {
 		method = http.MethodGet

@@ -12,7 +12,7 @@ import (
 )
 
 type Handler interface {
-	Handle(ctx context.Context, ip utils.IP) error
+	Handle(ctx context.Context, old, new utils.IP) error
 }
 
 type Unmarshaler struct {

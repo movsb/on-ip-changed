@@ -49,7 +49,7 @@ func NewHandler(cfg *Config) *Handler {
 	return &Handler{cfg: cfg}
 }
 
-func (h *Handler) Handle(ctx context.Context, ip utils.IP) error {
+func (h *Handler) Handle(ctx context.Context, old, ip utils.IP) error {
 	var (
 		name string
 		args []string
@@ -69,6 +69,10 @@ func (h *Handler) Handle(ctx context.Context, ip utils.IP) error {
 				args[i] = ip.V4.String()
 			case `$IPv6`:
 				args[i] = ip.V6.String()
+			case `$OldIP`, `$OldIPv4`:
+				args[i] = old.V4.String()
+			case `$OldIPv6`:
+				args[i] = old.V6.String()
 			}
 		}
 	}
@@ -93,6 +97,9 @@ func (h *Handler) Handle(ctx context.Context, ip utils.IP) error {
 	cmd.Env = append(cmd.Env, fmt.Sprintf(`IP=%s`, ip.V4.String()))
 	cmd.Env = append(cmd.Env, fmt.Sprintf(`IPv4=%s`, ip.V4.String()))
 	cmd.Env = append(cmd.Env, fmt.Sprintf(`IPv6=%s`, ip.V6.String()))
+	cmd.Env = append(cmd.Env, fmt.Sprintf(`OldIP=%s`, old.V4.String()))
+	cmd.Env = append(cmd.Env, fmt.Sprintf(`OldIPv4=%s`, old.V4.String()))
+	cmd.Env = append(cmd.Env, fmt.Sprintf(`OldIPv6=%s`, old.V6.String()))
 
 	if err := cmd.Run(); err != nil {
 		log.Printf(`shell: %v`, err)

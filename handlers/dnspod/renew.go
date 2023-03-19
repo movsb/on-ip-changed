@@ -42,7 +42,7 @@ func (r *Handler) upsert(ctx context.Context, ty string, value string) error {
 	return nil
 }
 
-func (r *Handler) Handle(ctx context.Context, ip utils.IP) error {
+func (r *Handler) Handle(ctx context.Context, _, ip utils.IP) error {
 	if ip.V4 != nil {
 		if err := r.upsert(ctx, `A`, ip.V4.String()); err != nil {
 			return err

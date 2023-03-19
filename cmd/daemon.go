@@ -127,11 +127,12 @@ func (t *TaskExecutor) Execute(ctx context.Context) {
 		return
 	}
 
+	old := t.ips
 	t.ips = ip
 
 	for i, hc := range t.task.Handlers {
 		h := hc.Handler()
-		if err := h.Handle(ctx, t.ips); err != nil {
+		if err := h.Handle(ctx, old, t.ips); err != nil {
 			t.log.Printf(`error executing handler[%d]: %v`, i, err)
 			continue
 		}

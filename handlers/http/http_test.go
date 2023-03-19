@@ -28,5 +28,5 @@ func TestHTTP(t *testing.T) {
 			`token`: `ttt`,
 		},
 	})
-	h.Handle(context.Background(), utils.IP{V4: net.IPv4(1, 2, 3, 4)})
+	h.Handle(context.Background(), utils.IP{}, utils.IP{V4: net.IPv4(1, 2, 3, 4)})
 }
