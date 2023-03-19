@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/movsb/on-ip-changed/utils"
 	"github.com/movsb/on-ip-changed/utils/registry"
 )
 
@@ -32,7 +33,7 @@ func NewHandler(cfg *Config) *Handler {
 	return &Handler{cfg: cfg}
 }
 
-func (h *Handler) Handle(ctx context.Context, ip string) error {
+func (h *Handler) Handle(ctx context.Context, ip utils.IP) error {
 	method := h.cfg.Method
 	if method == "" {
 		method = http.MethodGet
@@ -48,8 +49,11 @@ func (h *Handler) Handle(ctx context.Context, ip string) error {
 	if len(h.cfg.Args) > 0 {
 		args := u.Query()
 		for k, v := range h.cfg.Args {
-			if v == `$IP` {
-				v = ip
+			switch v {
+			case `$IP`, `$IPv4`:
+				v = ip.V4.String()
+			case `$IPv6`:
+				v = ip.V6.String()
 			}
 			args.Set(k, v)
 		}
@@ -57,7 +61,9 @@ func (h *Handler) Handle(ctx context.Context, ip string) error {
 	}
 	var body io.Reader
 	if b := h.cfg.Body; len(b) > 0 {
-		b = strings.ReplaceAll(b, `$IP`, ip) // TODO: $IPx will be 1.2.3.4x
+		b = strings.ReplaceAll(b, `$IP`, ip.V4.String())
+		b = strings.ReplaceAll(b, `$IPv4`, ip.V4.String())
+		b = strings.ReplaceAll(b, `$IPv6`, ip.V6.String())
 		body = strings.NewReader(b)
 	}
 	req, err := http.NewRequestWithContext(ctx, method, u.String(), body)

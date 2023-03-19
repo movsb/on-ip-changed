@@ -6,9 +6,8 @@ import (
 )
 
 func TestIfConfig(t *testing.T) {
-	t.SkipNow()
 	i := NewIfConfig(&Config{
-		Name: `tun0`,
+		Name: `br0`,
 	})
 	t.Log(i.Get(context.TODO()))
 }

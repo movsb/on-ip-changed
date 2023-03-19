@@ -1,6 +1,9 @@
 package website
 
-import "testing"
+import (
+	"context"
+	"testing"
+)
 
 func TestJsonExtractor(t *testing.T) {
 	d := `{"a":{"rs":1,"code":0,"address":"中国  北京 北京市 教育网","ip":"103.201.26.28","isDomain":0}}`
@@ -30,4 +33,12 @@ func TestSearchExtractor(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(ip)
+}
+
+func TestWebsites(t *testing.T) {
+	w := NewWebsite(&Config{
+		URL:    `https://ifconfig.co/ip`,
+		Format: `text`,
+	})
+	t.Log(w.Get(context.TODO()))
 }

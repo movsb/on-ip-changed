@@ -2,6 +2,8 @@
 
 On-IP-Changed is a small utility that periodically checks the IP of the system running this program and invokes handlers to notify what the change is.
 
+Support both IPv6 and IPv6.
+
 ## Config File
 
 Full configuration example:
@@ -31,6 +33,12 @@ tasks:
       - shell: 
           command: echo --- $IP ---
 ```
+
+### (Environment) Variables
+
+- $IP
+- $IPv4
+- $IPv6
 
 ## Concepts
 
@@ -106,6 +114,12 @@ Can be one of:
   This enables searching for the first IP address in the content using a regexp matching a single IPv4 address.
 
   `path` is not used.
+  
+  **search** currently doesn't work for IPv6 addresses.
+  
+#### IPv6
+
+Set `ipv6: true` to get IPv6 addresses.
 
 #### List
 
@@ -149,8 +163,6 @@ Example configuration:
 type: ifconfig
 name: eth0
 ```
-
-If the named interface has multiple IP addresses configured, you can use `index`, starting from `0`, to specify which IP address will be used.
 
 ### Asus
 

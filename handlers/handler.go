@@ -7,11 +7,12 @@ import (
 	_ "github.com/movsb/on-ip-changed/handlers/dnspod"
 	_ "github.com/movsb/on-ip-changed/handlers/http"
 	_ "github.com/movsb/on-ip-changed/handlers/shell"
+	"github.com/movsb/on-ip-changed/utils"
 	"github.com/movsb/on-ip-changed/utils/registry"
 )
 
 type Handler interface {
-	Handle(ctx context.Context, ip string) error
+	Handle(ctx context.Context, ip utils.IP) error
 }
 
 type Unmarshaler struct {
@@ -51,7 +52,7 @@ func (u *Unmarshaler) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 	hh, ok := h.(Handler)
 	if !ok {
-		return fmt.Errorf("getter: not a handler")
+		return fmt.Errorf("handler: not a handler")
 	}
 	u.h = hh
 	return nil

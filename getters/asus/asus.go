@@ -36,15 +36,17 @@ func NewAsus(c *Config) *Asus {
 	return &Asus{c: c}
 }
 
-func (a *Asus) Get(ctx context.Context) (string, error) {
+func (a *Asus) Get(ctx context.Context) (utils.IP, error) {
 	if err := a.login(ctx); err != nil {
-		return ``, err
+		return utils.IP{}, err
 	}
 	s, err := a.status(ctx)
 	if err != nil {
-		return ``, err
+		return utils.IP{}, err
 	}
-	return s.WanLinkIpAddr, nil
+	return utils.IP{
+		V4: net.ParseIP(s.WanLinkIpAddr).To4(),
+	}, nil
 }
 
 func (a *Asus) login(ctx context.Context) error {

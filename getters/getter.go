@@ -8,11 +8,12 @@ import (
 	_ "github.com/movsb/on-ip-changed/getters/domain"
 	_ "github.com/movsb/on-ip-changed/getters/ifconfig"
 	_ "github.com/movsb/on-ip-changed/getters/website"
+	"github.com/movsb/on-ip-changed/utils"
 	"github.com/movsb/on-ip-changed/utils/registry"
 )
 
 type Getter interface {
-	Get(ctx context.Context) (string, error)
+	Get(ctx context.Context) (utils.IP, error)
 }
 
 type Unmarshaler struct {

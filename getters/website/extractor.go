@@ -3,7 +3,6 @@ package website
 import (
 	"encoding/json"
 	"fmt"
-	"net"
 	"regexp"
 	"strings"
 )
@@ -29,11 +28,11 @@ func (e *JsonExtractor) Extract() (string, error) {
 	for _, path := range strings.Split(e.path, `.`) {
 		m, ok := i.(map[string]interface{})
 		if !ok {
-			return "", fmt.Errorf(`json_extractor: not an object`)
+			return ``, fmt.Errorf(`json_extractor: not an object`)
 		}
 		ii, ok := m[path]
 		if !ok {
-			return "", fmt.Errorf(`json_extractor: path not found`)
+			return ``, fmt.Errorf(`json_extractor: path not found`)
 		}
 		i = ii
 	}
@@ -53,11 +52,7 @@ func NewRawExtractor(s string) Extractor {
 
 func (e *RawExtractor) Extract() (string, error) {
 	s := strings.TrimSpace(e.s)
-	ip := net.ParseIP(s).To4()
-	if ip == nil {
-		return ``, fmt.Errorf(`text_extractor: not an ip: %s`, s)
-	}
-	return ip.String(), nil
+	return s, nil
 }
 
 type SearchExtractor struct {
@@ -72,12 +67,5 @@ func (e *SearchExtractor) Extract() (string, error) {
 	re := regexp.MustCompile(`\d+\.\d+\.\d+\.\d+`)
 	// TODO search upon success
 	ipstr := re.FindString(e.s)
-	if ipstr == `` {
-		return ``, fmt.Errorf(`search_extractor: ip not found`)
-	}
-	ip := net.ParseIP(ipstr).To4()
-	if ip == nil {
-		return ``, fmt.Errorf(`search_extrator: not an ip: %s`, ipstr)
-	}
-	return ip.String(), nil
+	return ipstr, nil
 }

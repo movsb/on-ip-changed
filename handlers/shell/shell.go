@@ -8,6 +8,7 @@ import (
 	"os/exec"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/movsb/on-ip-changed/utils"
 	"github.com/movsb/on-ip-changed/utils/registry"
 )
 
@@ -48,7 +49,7 @@ func NewHandler(cfg *Config) *Handler {
 	return &Handler{cfg: cfg}
 }
 
-func (h *Handler) Handle(ctx context.Context, ip string) error {
+func (h *Handler) Handle(ctx context.Context, ip utils.IP) error {
 	var (
 		name string
 		args []string
@@ -63,8 +64,11 @@ func (h *Handler) Handle(ctx context.Context, ip string) error {
 		name = h.cfg.Command.SS[0]
 		args = h.cfg.Command.SS[1:]
 		for i, arg := range args {
-			if arg == `$IP` {
-				args[i] = ip
+			switch arg {
+			case `$IP`, `$IPv4`:
+				args[i] = ip.V4.String()
+			case `$IPv6`:
+				args[i] = ip.V6.String()
 			}
 		}
 	}
@@ -86,7 +90,9 @@ func (h *Handler) Handle(ctx context.Context, ip string) error {
 		cmd.Env = append(cmd.Env, e)
 	}
 
-	cmd.Env = append(cmd.Env, fmt.Sprintf(`IP=%s`, ip))
+	cmd.Env = append(cmd.Env, fmt.Sprintf(`IP=%s`, ip.V4.String()))
+	cmd.Env = append(cmd.Env, fmt.Sprintf(`IPv4=%s`, ip.V4.String()))
+	cmd.Env = append(cmd.Env, fmt.Sprintf(`IPv6=%s`, ip.V6.String()))
 
 	if err := cmd.Run(); err != nil {
 		log.Printf(`shell: %v`, err)

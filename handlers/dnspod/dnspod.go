@@ -63,11 +63,11 @@ func NewDnsPod(c *Config) *DnsPod {
 }
 
 // CreateRecord creates a new record.
-func (d *DnsPod) CreateRecord(ctx context.Context, domain string, record string, value string) (*Record, error) {
+func (d *DnsPod) CreateRecord(ctx context.Context, domain string, record string, ty string, value string) (*Record, error) {
 	data, err := d.post(ctx, `Record.Create`, map[string]interface{}{
 		`domain`:      domain,
 		`sub_domain`:  record,
-		"record_type": "A",
+		"record_type": ty,
 		"record_line": "默认",
 		`value`:       value,
 	})
@@ -84,11 +84,11 @@ func (d *DnsPod) CreateRecord(ctx context.Context, domain string, record string,
 	return &resp.Record, nil
 }
 
-func (d *DnsPod) FindRecord(ctx context.Context, domain string, record string) (*Record, error) {
+func (d *DnsPod) FindRecord(ctx context.Context, domain string, ty string, record string) (*Record, error) {
 	data, err := d.post(ctx, "Record.List", map[string]interface{}{
 		"domain":      domain,
 		"sub_domain":  record,
-		"record_type": "A",
+		"record_type": ty,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("dnspod: error finding record: %w", err)
@@ -109,12 +109,12 @@ func (d *DnsPod) FindRecord(ctx context.Context, domain string, record string) (
 	return resp.Records[0], nil
 }
 
-func (d *DnsPod) ModifyRecord(ctx context.Context, domain string, recordID string, name string, value string) error {
+func (d *DnsPod) ModifyRecord(ctx context.Context, domain string, recordID string, record string, ty string, value string) error {
 	data, err := d.post(ctx, "Record.Modify", map[string]interface{}{
 		"domain":      domain,
 		"record_id":   recordID,
-		"sub_domain":  name,
-		"record_type": "A",
+		"sub_domain":  record,
+		"record_type": ty,
 		"record_line": "默认",
 		"value":       value,
 	})

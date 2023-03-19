@@ -13,6 +13,7 @@ import (
 
 	"github.com/movsb/on-ip-changed/config"
 	"github.com/movsb/on-ip-changed/getters"
+	"github.com/movsb/on-ip-changed/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -100,7 +101,7 @@ type TaskExecutor struct {
 	task        *config.TaskConfig
 	concurrency int
 	initial     bool
-	last        string
+	ips         utils.IP
 	log         *log.Logger
 }
 
@@ -113,24 +114,24 @@ func (t *TaskExecutor) Execute(ctx context.Context) {
 	}
 	ip, err := getters.Request(ctx, gets, t.concurrency)
 	if err != nil {
-		t.log.Println(err)
+		t.log.Println(`error: `, err)
 		return
 	}
-	if t.last == `` && !t.initial {
-		t.last = ip
-		t.log.Printf(`got initial ip: %s`, ip)
+	if t.ips.V4 == nil && t.ips.V6 == nil && !t.initial {
+		t.ips = ip
+		t.log.Printf(`got initial ip: %v`, ip)
 		return
 	}
-	if ip == t.last {
+	if ip.V4.String() == t.ips.V4.String() && ip.V6.String() == t.ips.V6.String() {
 		t.log.Printf(`ip not changed, skip executing handlers`)
 		return
 	}
 
-	t.last = ip
+	t.ips = ip
 
 	for i, hc := range t.task.Handlers {
 		h := hc.Handler()
-		if err := h.Handle(ctx, t.last); err != nil {
+		if err := h.Handle(ctx, t.ips); err != nil {
 			t.log.Printf(`error executing handler[%d]: %v`, i, err)
 			continue
 		}
