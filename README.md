@@ -1,8 +1,8 @@
 # on-ip-changed
 
-On-IP-Changed is a small utility that periodically checks the IP of the system running this program and invokes handlers to notify what the change is.
+On-IP-Changed is a small utility that periodically gets the IP of the system running this program and invokes handlers to notify what the change is.
 
-Support both IPv6 and IPv6.
+Support both IPv4 and IPv6.
 
 ## Config File
 
