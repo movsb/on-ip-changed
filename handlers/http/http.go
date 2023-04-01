@@ -61,9 +61,9 @@ func (h *Handler) Handle(ctx context.Context, _, ip utils.IP) error {
 	}
 	var body io.Reader
 	if b := h.cfg.Body; len(b) > 0 {
-		b = strings.ReplaceAll(b, `$IP`, ip.V4.String())
 		b = strings.ReplaceAll(b, `$IPv4`, ip.V4.String())
 		b = strings.ReplaceAll(b, `$IPv6`, ip.V6.String())
+		b = strings.ReplaceAll(b, `$IP`, ip.V4.String())
 		body = strings.NewReader(b)
 	}
 	req, err := http.NewRequestWithContext(ctx, method, u.String(), body)
