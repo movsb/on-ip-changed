@@ -53,11 +53,15 @@ func Request(ctx context.Context, getters []Getter, concurrency int) (utils.IP, 
 
 	ips4 := make(map[string][]int)
 	ips6 := make(map[string][]int)
+	available := 0
 	for i := 0; i < concurrency; i++ {
 		r := <-res
 		if r.err != nil {
 			continue
 		}
+		// 只统计成功拿到 IP 地址的个数，失败的不算在内。
+		// 比如：请求两个，如果只成功一个，那就取成功的那一个。
+		available++
 		if r.ip.V4 != nil {
 			ips4[r.ip.V4.String()] = append(ips4[r.ip.V4.String()], r.i)
 		}
@@ -84,13 +88,13 @@ func Request(ctx context.Context, getters []Getter, concurrency int) (utils.IP, 
 	}
 
 	switch {
-	case concurrency == 1 && (max4 == 0 && max6 == 0):
+	case available == 1 && (max4 == 0 && max6 == 0):
 		return utils.IP{}, fmt.Errorf(`concurrency == 1 && success == 0`)
-	case concurrency == 2 && (max4 != 2 && max6 != 2):
+	case available == 2 && (max4 != 2 && max6 != 2):
 		return utils.IP{}, fmt.Errorf(`concurrency == 2 && not all succeeded`)
 	default:
-		if max4 <= concurrency/2 && max6 <= concurrency/2 {
-			return utils.IP{}, fmt.Errorf(`cannot find majority (4:%d/6:%d/%d)`, max4, max6, concurrency)
+		if max4 <= available/2 && max6 <= available/2 {
+			return utils.IP{}, fmt.Errorf(`cannot find majority (4:%d/6:%d/%d)`, max4, max6, available)
 		}
 	}
 
