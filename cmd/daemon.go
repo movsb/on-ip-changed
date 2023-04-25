@@ -117,6 +117,14 @@ func (t *TaskExecutor) Execute(ctx context.Context) {
 		t.log.Println(`error: `, err)
 		return
 	}
+	if t.task.IPv4Only {
+		ip.V6 = nil
+		ip.V6PrefixLength = 0
+	}
+	if t.task.IPv6Only {
+		ip.V4 = nil
+		ip.V4PrefixLength = 0
+	}
 	if t.ips.V4 == nil && t.ips.V6 == nil && !t.initial {
 		t.ips = ip
 		t.log.Printf(`got initial ip: %v`, ip)

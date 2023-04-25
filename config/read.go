@@ -19,5 +19,10 @@ func ReadConfig(path string) *Config {
 	if err := dec.Decode(&cfg); err != nil {
 		panic(err)
 	}
+	for _, task := range cfg.Tasks {
+		if task.IPv4Only && task.IPv6Only {
+			panic(`ipv4only and ipv6only cannot be used together`)
+		}
+	}
 	return &cfg
 }

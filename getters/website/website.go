@@ -2,6 +2,7 @@ package website
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -21,7 +22,6 @@ type Config struct {
 	URL    string
 	Format string
 	Path   string
-	IPv6   bool
 }
 
 type Website struct {
@@ -33,11 +33,48 @@ func NewWebsite(c *Config) *Website {
 }
 
 func (w *Website) Get(ctx context.Context) (utils.IP, error) {
-	return w.roundtrip(ctx, -1, w.c.URL, w.c.Format, w.c.Path)
+	var je error
+	ipr := utils.IP{}
+	body1, err1 := w.roundtrip(ctx, -1, `tcp4`, w.c.URL)
+	if err1 == nil {
+		if ipstr, err := w.extract(body1, w.c.Format, w.c.Path); err1 == nil {
+			if ip := net.ParseIP(ipstr); ip.To4() != nil {
+				ipr.V4 = ip.To4()
+			} else {
+				log.Println(`invalid ipv4 address:`, ipstr, len(ip))
+			}
+		} else {
+			je = errors.Join(je, err)
+			log.Println(`error extracting from body:`, err, body1)
+		}
+	} else {
+		log.Println(`error roundtripping for:`, err1, w.c.URL)
+		je = errors.Join(je, err1)
+	}
+	body2, err2 := w.roundtrip(ctx, -1, `tcp6`, w.c.URL)
+	if err2 == nil {
+		if ipstr, err := w.extract(body2, w.c.Format, w.c.Path); err2 == nil {
+			if ip := net.ParseIP(ipstr); ip.To16() != nil && ip.To4() == nil && ip.IsGlobalUnicast() {
+				ipr.V6 = ip.To16()
+			} else {
+				log.Println(`invalid ipv6 address:`, ipstr)
+			}
+		} else {
+			log.Println(`error extracting from body:`, err, body2)
+			je = errors.Join(je, err)
+		}
+	} else {
+		log.Println(`error roundtripping for:`, err2, w.c.URL)
+		je = errors.Join(je, err2)
+	}
+	if ipr.V4 == nil && ipr.V6 == nil {
+		return ipr, je
+	}
+
+	return ipr, nil
 }
 
-func (w *Website) roundtrip(ctx context.Context, i int, url, format, path string) (utils.IP, error) {
-	ipr := utils.IP{}
+func (w *Website) roundtrip(ctx context.Context, i int, proto, url string) (string, error) {
 	st := time.Now()
 	log.Printf(`roundtrip: [%d] sending request to %s`, i, url)
 	defer func() {
@@ -47,32 +84,33 @@ func (w *Website) roundtrip(ctx context.Context, i int, url, format, path string
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return ipr, fmt.Errorf(`roundtrip: bad request: %w`, err)
+		return ``, fmt.Errorf(`roundtrip: bad request: %w`, err)
 	}
 	client := http.Client{
 		Transport: &http.Transport{
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-				n := `tcp`
-				if w.c.IPv6 {
-					n = `tcp6`
-				}
-				return net.Dial(n, addr)
+				return net.Dial(proto, addr)
 			},
 		},
 	}
 	res, err := client.Do(req)
 	if err != nil {
-		return ipr, fmt.Errorf(`roundtrip: http err: %w`, err)
+		return ``, fmt.Errorf(`roundtrip: http err: %w`, err)
 	}
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
 		b, _ := io.ReadAll(io.LimitReader(res.Body, 1<<10))
-		return ipr, fmt.Errorf(`roundtrip: bad status: %s: %s: %s`, res.Status, url, string(b))
+		return ``, fmt.Errorf(`roundtrip: bad status: %s: %s: %s`, res.Status, url, string(b))
 	}
 	body, err := io.ReadAll(io.LimitReader(res.Body, 1<<20))
 	if err != nil {
-		return ipr, fmt.Errorf(`roundtrip: error reading body: %w`, err)
+		return ``, fmt.Errorf(`roundtrip: error reading body: %w`, err)
 	}
+
+	return string(body), nil
+}
+
+func (w *Website) extract(body string, format, path string) (string, error) {
 	str := string(body)
 
 	var e Extractor
@@ -84,24 +122,13 @@ func (w *Website) roundtrip(ctx context.Context, i int, url, format, path string
 	case `search`:
 		e = NewSearchExtractor(str)
 	default:
-		return ipr, fmt.Errorf(`roundtrip: unknown type: %s`, format)
+		return ``, fmt.Errorf(`roundtrip: unknown type: %s`, format)
 	}
 
 	ipstr, err := e.Extract()
 	if err != nil {
-		return ipr, fmt.Errorf(`roundtrip: error extracting: %w`, err)
+		return ``, fmt.Errorf(`roundtrip: error extracting: %w`, err)
 	}
 
-	ip := net.ParseIP(ipstr)
-	if len(ip) == net.IPv4len || ip.To4() != nil {
-		ipr.V4 = ip.To4()
-	} else if len(ip) == net.IPv6len {
-		ipr.V6 = ip.To16()
-	}
-
-	if ipr.V4 == nil && ipr.V6 == nil {
-		return ipr, fmt.Errorf(`no ipv4/ipv6 address was found`)
-	}
-
-	return ipr, nil
+	return ipstr, nil
 }

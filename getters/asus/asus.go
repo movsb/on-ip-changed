@@ -36,6 +36,7 @@ func NewAsus(c *Config) *Asus {
 	return &Asus{c: c}
 }
 
+// IPv4 only
 func (a *Asus) Get(ctx context.Context) (utils.IP, error) {
 	if err := a.login(ctx); err != nil {
 		return utils.IP{}, err

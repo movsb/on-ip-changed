@@ -45,6 +45,9 @@ type TaskConfig struct {
 	Name     string                  `yaml:"name"`
 	Getters  []*getters.Unmarshaler  `yaml:"getters"`
 	Handlers []*handlers.Unmarshaler `yaml:"handlers"`
+
+	IPv4Only bool `yaml:"ipv4only"`
+	IPv6Only bool `yaml:"ipv6only"`
 }
 
 ////////////////////////////////////////////////////////////////

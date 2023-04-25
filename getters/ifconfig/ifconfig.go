@@ -39,9 +39,9 @@ func (i *IfConfig) Get(ctx context.Context) (utils.IP, error) {
 	if len(addrs) == 0 {
 		return ipr, fmt.Errorf(`ifconfig: no addrs was found`)
 	}
-	if i.c.Index < 0 || i.c.Index > len(addrs)-1 {
-		return ipr, fmt.Errorf(`ifconfig: index out of range`)
-	}
+	// if i.c.Index < 0 || i.c.Index > len(addrs)-1 {
+	// 	return ipr, fmt.Errorf(`ifconfig: index out of range`)
+	// }
 	for _, addr := range addrs {
 		ip := net.ParseIP(addr.String())
 		if ip == nil {
@@ -50,15 +50,15 @@ func (i *IfConfig) Get(ctx context.Context) (utils.IP, error) {
 				ip = ip2
 			}
 		}
-		if len(ip) == net.IPv4len || ip.To4() != nil {
-			ipr.V4 = ip.To4()
-		} else if len(ip) == net.IPv6len {
+		if ip2 := ip.To4(); ip2 != nil {
+			ipr.V4 = ip2
+		} else if ip2 := ip.To16(); ip2 != nil && ip2.To4() == nil && ip.IsGlobalUnicast() {
 			ipr.V6 = ip.To16()
 		}
 	}
 
-	if ipr.V4 == nil {
-		return ipr, fmt.Errorf(`ifconfig: no ipv4 address was found`)
+	if ipr.V4 == nil && ipr.V6 == nil {
+		return ipr, fmt.Errorf(`ifconfig: no ip v4/v6 address was found`)
 	}
 
 	return ipr, nil

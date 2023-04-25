@@ -32,6 +32,8 @@ tasks:
     handlers:
       - shell: 
           command: echo --- $IP ---
+    ipv6only: true
+    ipv4only: true
 ```
 
 ### (Environment) Variables
@@ -117,10 +119,6 @@ Can be one of:
   
   **search** currently doesn't work for IPv6 addresses.
   
-#### IPv6
-
-Set `ipv6: true` to get IPv6 addresses.
-
 #### List
 
 Some example websites which can give you your IP address:

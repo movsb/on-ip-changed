@@ -36,9 +36,13 @@ func (d *Domain) Get(ctx context.Context) (utils.IP, error) {
 		if ip2 := ip.IP.To4(); ip2 != nil {
 			ipr.V4 = ip2
 		}
-		if ip2 := ip.IP.To16(); ip2 != nil {
+		if ip2 := ip.IP.To16(); ip2 != nil && ip2.To4() == nil && ip2.IsGlobalUnicast() {
 			ipr.V6 = ip2
 		}
 	}
+	if ipr.V4 != nil || ipr.V6 != nil {
+		return ipr, nil
+	}
+
 	return ipr, fmt.Errorf("ifconfig: no ip v4/v6 addresses")
 }
