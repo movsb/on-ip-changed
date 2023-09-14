@@ -19,9 +19,10 @@ func init() {
 }
 
 type Config struct {
-	URL    string
-	Format string
-	Path   string
+	URL       string
+	Format    string
+	Path      string
+	UserAgent string `yaml:"user_agent"`
 }
 
 type Website struct {
@@ -85,6 +86,9 @@ func (w *Website) roundtrip(ctx context.Context, i int, proto, url string) (stri
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return ``, fmt.Errorf(`roundtrip: bad request: %w`, err)
+	}
+	if ua := w.c.UserAgent; ua != `` {
+		req.Header.Set(`User-Agent`, ua)
 	}
 	client := http.Client{
 		Transport: &http.Transport{

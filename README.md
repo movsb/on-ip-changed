@@ -79,6 +79,7 @@ type: website
 url: domain.to.get.my.ip.address.example.com
 format: json
 path: ip
+# user_agent: ???
 ```
 
 #### Format

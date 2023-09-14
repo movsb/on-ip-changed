@@ -37,8 +37,9 @@ func TestSearchExtractor(t *testing.T) {
 
 func TestWebsites(t *testing.T) {
 	w := NewWebsite(&Config{
-		URL:    `https://ifconfig.co/ip`,
-		Format: `text`,
+		URL:       `https://api.ip.sb/ip`,
+		Format:    `text`,
+		UserAgent: `Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0`,
 	})
 	t.Log(w.Get(context.TODO()))
 }
