@@ -25,7 +25,20 @@ func AddCommands(parent *cobra.Command) {
 		Run:   daemon,
 	}
 	daemonCmd.Flags().StringP(`config`, `c`, `config.yaml`, `configuration file`)
+	daemonCmd.Flags().Bool(`dry-run`, false, `Run getters and not handlers, results are printed into stdout.`)
 	parent.AddCommand(daemonCmd)
+}
+
+type ctxDryRun struct{}
+
+func isDryRun(ctx context.Context) bool {
+	if v, ok := ctx.Value(ctxDryRun{}).(bool); ok {
+		return v
+	}
+	return false
+}
+func withDryRun(ctx context.Context, dryRun bool) context.Context {
+	return context.WithValue(ctx, ctxDryRun{}, dryRun)
 }
 
 func daemon(cmd *cobra.Command, args []string) {
@@ -34,6 +47,11 @@ func daemon(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 	cfg := config.ReadConfig(configFileString)
+
+	dryRun, err := cmd.Flags().GetBool(`dry-run`)
+	if err != nil {
+		panic(err)
+	}
 
 	var tes []*TaskExecutor
 	for _, t := range cfg.Tasks {
@@ -49,6 +67,8 @@ func daemon(cmd *cobra.Command, args []string) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	ctx = withDryRun(ctx, dryRun)
 
 	go func() {
 		ch := make(chan os.Signal, 1)
@@ -138,11 +158,13 @@ func (t *TaskExecutor) Execute(ctx context.Context) {
 	old := t.ips
 	t.ips = ip
 
-	for i, hc := range t.task.Handlers {
-		h := hc.Handler()
-		if err := h.Handle(ctx, old, t.ips); err != nil {
-			t.log.Printf(`error executing handler[%d]: %v`, i, err)
-			continue
+	if !isDryRun(ctx) {
+		for i, hc := range t.task.Handlers {
+			h := hc.Handler()
+			if err := h.Handle(ctx, old, t.ips); err != nil {
+				t.log.Printf(`error executing handler[%d]: %v`, i, err)
+				continue
+			}
 		}
 	}
 }
