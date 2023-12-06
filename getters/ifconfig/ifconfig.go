@@ -52,7 +52,7 @@ func (i *IfConfig) Get(ctx context.Context) (utils.IP, error) {
 		}
 		if ip2 := ip.To4(); ip2 != nil {
 			ipr.V4 = ip2
-		} else if ip2 := ip.To16(); ip2 != nil && ip2.To4() == nil && ip.IsGlobalUnicast() {
+		} else if ip2 := ip.To16(); ip2 != nil && ip2.To4() == nil && ip.IsGlobalUnicast() && !ip.IsPrivate() {
 			ipr.V6 = ip.To16()
 		}
 	}

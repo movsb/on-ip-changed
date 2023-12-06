@@ -163,6 +163,8 @@ type: ifconfig
 name: eth0
 ```
 
+For IPv6 addresses, it current report the global unicast address only (not including unique local addresses).
+
 ### Asus
 
 **Asus** gets the WAN IP address of the Asus router family (not well tested).
