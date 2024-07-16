@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	_ "github.com/movsb/on-ip-changed/handlers/cloudflare"
 	_ "github.com/movsb/on-ip-changed/handlers/dnspod"
 	_ "github.com/movsb/on-ip-changed/handlers/http"
 	_ "github.com/movsb/on-ip-changed/handlers/shell"

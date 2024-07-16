@@ -276,4 +276,17 @@ dnspod:
   record: subdomain
 ```
 
+### Cloudflare
+
+**Cloudflare** handler updates your DNS record of Cloudflare.
+
+Example configuration:
+
+```yaml
+cloudflare:
+  token: xxx
+  zone_id: yyy
+  name: sub.example.com
+```
+
 There should have been more DNS provider handlers...
